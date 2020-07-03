@@ -6,6 +6,8 @@ import MainSlider from './modules/slider/slider-main';
 import MiniSlider from './modules/slider/slider-mini';
 
 import VideoPlayer from './modules/playVideo';
+import Difference from './modules/difference';
+import Form from './modules/form';
 
 window.addEventListener('DOMContentLoaded', () => {
     // первый вариант (главный слайдер в slider.js, в качестве аргументов - переменные)
@@ -15,6 +17,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // новый вариант (главный слайдер в main-slider.js, аргумент - объект)
     const slider = new MainSlider({btns: ".next", container: ".page"});
     slider.render();
+
+    const modulesPageSlider = new MainSlider({btns: ".next", container: ".moduleapp", nextBtns: ".nextmodule", prevBtns: ".prevmodule"});
+    modulesPageSlider.render();
 
     const showUpSlider = new MiniSlider({
         container: ".showup__content-slider",
@@ -43,6 +48,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     feedSlider.init();
 
-    const player = new VideoPlayer('.showup .play', '.overlay');
-    player.init();
+    new VideoPlayer('.showup .play', '.overlay').init();
+    new VideoPlayer('.module__video-item .play', '.overlay').init();
+
+    // другой вариант создания экзмемпляра и вызова метдода
+    new Difference('.officerold', '.officernew', '.officer__card-item').init();
+
+    new Form('.form').init();
 });

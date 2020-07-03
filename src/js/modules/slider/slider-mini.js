@@ -16,10 +16,7 @@ export default class MiniSlider extends Slider {
             }
         });
         
-        // добавляем первому слайду класс активности (если он не кнопка)
-        if (!this.slides[0].closest('button')) {
-            this.slides[0].classList.add(this.activeClass);
-        }
+        this.slides[0].classList.add(this.activeClass);
         
         // если передан параметр animated, то задаем нужным элементам прозрачность
         if (this.animate) {
@@ -29,54 +26,69 @@ export default class MiniSlider extends Slider {
     }
 
     nextSlide() {
-        // условия для решения проблемы с кнопками (они в одном из слайдеров содержатся в верстке вместе со слайдами. В какой-то момент возникает баг при котором сами кнопки становятся слайдами)
-        if (this.slides[1].tagName == 'BUTTON' && this.slides[2].tagName) {
-            this.container.appendChild(this.slides[0]);
-            this.container.appendChild(this.slides[1]);
-            this.container.appendChild(this.slides[2]);
-            this.decorizeSlides();
-        } else if (this.slides[1].tagName == 'BUTTON') {
-            this.container.appendChild(this.slides[0]);
-            this.container.appendChild(this.slides[1]);
-            this.decorizeSlides();
+        // Моя версия решения проблемы с кнопками (они в одном из слайдеров содержатся в верстке вместе со слайдами. В какой-то момент возникает баг при котором сами кнопки становятся слайдами)
+        // при нажатии на next первый слайд перемещается в конец списка слайдов
+        this.container.appendChild(this.slides[0]);
+        if (this.slides[0].tagName !== 'BUTTON') {
+            this.decorizeSlides(); 
         } else {
-            this.container.appendChild(this.slides[0]);
-            this.decorizeSlides();
+            this.nextSlide(); 
         }
+
+        // Остановка автопереключения слайдов при наведении на кнопки или слайды
+        this.prev.addEventListener('mouseenter', () => clearInterval(this.autoChangeSlide));
+        this.next.addEventListener('mouseenter', () => clearInterval(this.autoChangeSlide));
+        this.container.addEventListener('mouseenter', () => clearInterval(this.autoChangeSlide));
+       
+    }
+
+    prevSlide() {
+        // Моя версия решения проблемы с кнопками
+        // при нажатии на prev последний слайд перемещается в начало списка слайдов
+        let lastSlide = this.slides[this.slides.length - 1];
+        this.container.insertBefore(lastSlide, this.slides[0]);
+            if (lastSlide.tagName !== 'BUTTON') {
+                this.decorizeSlides();
+            } else {
+                this.prevSlide();
+            }
+    }
+
+    autoPlay() {
+        this.autoChangeSlide = setInterval(() => this.nextSlide(), 1000);
     }
 
     bindTriggers() {
-        // при нажатии на next первый слайд перемещается в конец списка слайдов
+    
         this.next.addEventListener('click', () => this.nextSlide());
+        this.prev.addEventListener('click', () => this.prevSlide());
 
-        // при нажатии на prev последний слайд перемещается в начало списка слайдов
-        this.prev.addEventListener('click', () => {
-
-            for (let i = this.slides.length -1; i > 0; i--) {
-                if (this.slides[i].tagName !== 'BUTTON') {
-                    let active = this.slides[i];
-                    this.container.insertBefore(active, this.slides[0]);
-                    this.decorizeSlides();
-                    break;
-                }
-            }            
-        });
     }
 
     init() {
-        this.container.style.cssText = `
+        try {
+            this.container.style.cssText = `
             display: flex;
             flex-wrap: wrap;
             overflow: hidden;
             align-items: flex-start
-        `;
+            `;
 
-        this.bindTriggers();
-        this.decorizeSlides();
+            let autoChangeSlide;
 
-        // Если параметр autoplay передан, то включается автопереключение слайдов
-        if (this.autoplay) {
-            setInterval(() => this.nextSlide(), 5000);
+            this.bindTriggers();
+            this.decorizeSlides();
+
+            // Если параметр autoplay передан, то включается автопереключение слайдов
+            if (this.autoplay) {
+                this.autoPlay();
+
+                // запуск автопереключения слайдов при покидании курсора кнопок и слайдов
+                this.next.addEventListener('mouseleave', () => this.autoPlay());
+                this.prev.addEventListener('mouseleave', () => this.autoPlay());
+                this.container.addEventListener('mouseleave', () => this.autoPlay());
+
         }
+        } catch(e) {}
     }
 }

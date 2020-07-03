@@ -4,12 +4,25 @@ export default class Slider {
     // в основном варианте передаем в конструктор объект. Если при создании экземпеляра не был передан объект, то ошибки не будет, т.к. задали значение по умолчанию путой объект (={})
     // Используем деструктуризацию объекта, поэтому все значения можно задавать в любом порядке
     // null в качестве дефолтных значений, т.к. в этом случае querySelector не будут выдвыать ошибку
-    constructor({container = null, btns = null, next = null, prev = null, activeClass = '', animate, autoplay} = {}) {
+    constructor({container = null,
+        btns = null,
+        next = null,
+        prev = null,
+        nextBtns = null,
+        prevBtns = null,
+        activeClass = '',
+        animate,
+        autoplay} = {}) {
         this.container = document.querySelector(container);
-        this.slides = this.container.children;
+        // обернули в try/catch для защиты от ошибок. В остальных свойствах ошибок не будет. При отсутствии параметров их результатами будет просто null. А в данном случае возникнет ошибка, т.к. children от null не существует
+        try {
+            this.slides = this.container.children;
+        } catch(e) {}
         this.btns = document.querySelectorAll(btns);
         this.prev = document.querySelector(prev);
         this.next = document.querySelector(next);
+        this.prevBtns = document.querySelectorAll(prevBtns);
+        this.nextBtns = document.querySelectorAll(nextBtns);
         this.activeClass = activeClass;
         this.animate = animate;
         this.autoplay = autoplay;
